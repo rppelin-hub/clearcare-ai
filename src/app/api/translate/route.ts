@@ -4,6 +4,8 @@ import { google } from "@ai-sdk/google";
 import { afterVisitCardSchema } from "@/lib/schema";
 import { validateClinicalInput } from "@/lib/validation";
 
+export const maxDuration = 30;
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
