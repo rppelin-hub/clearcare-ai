@@ -6,6 +6,8 @@ import { validateClinicalInput } from "@/lib/validation";
 
 export const maxDuration = 30;
 
+const MODELS = ["gemini-3.8-flash", "gemini-3.5-flash-lite"] as const;
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -29,21 +31,41 @@ export async function POST(req: Request) {
         ? "Write patient-facing explanations in warm, natural Taglish (clear English medical terms explained in everyday Filipino) suitable for Philippine outpatient clinics."
         : "Write patient-facing explanations in clear, jargon-free Plain English (Grade 6 reading level).";
 
-    const result = await generateText({
-      model: google("gemini-3.8-flash"),
-      output: Output.object({ schema: afterVisitCardSchema }),
-      instructions: [
-        "You are ClearCare AI, a clinical communication assistant helping outpatient nurses convert physician consultation notes into structured patient after-visit instructions.",
-        languageInstruction,
-        "STRICT SAFETY RULES:",
-        "1. Never invent or guess medication dosages not stated in the note. If a dose is unclear, write 'Verify dose with physician'.",
-        "2. Translate medical abbreviations (e.g., PO BID = by mouth twice a day, PRN = as needed, NPO = no food or drink).",
-        "3. Preserve every red-flag warning sign accurately.",
-      ].join("\n"),
-      prompt: `Translate the following anonymized consultation note into a structured After-Visit Action Card:\n\n${clinicalNote.trim()}`,
-    });
+    const instructions = [
+      "You are ClearCare AI, a clinical communication assistant helping outpatient nurses convert physician consultation notes into structured patient after-visit instructions.",
+      languageInstruction,
+      "STRICT SAFETY RULES:",
+      "1. Never invent or guess medication dosages not stated in the note. If a dose is unclear, write 'Verify dose with physician'.",
+      "2. Translate medical abbreviations (e.g., PO BID = by mouth twice a day, PRN = as needed, NPO = no food or drink).",
+      "3. Preserve every red-flag warning sign accurately.",
+    ].join("\n");
 
-    return NextResponse.json(result.output);
+    const prompt = `Translate the following anonymized consultation note into a structured After-Visit Action Card:\n\n${clinicalNote.trim()}`;
+
+    let lastError: unknown;
+    for (const modelId of MODELS) {
+      try {
+        const result = await generateText({
+          model: google(modelId),
+          output: Output.object({ schema: afterVisitCardSchema }),
+          instructions,
+          prompt,
+          maxRetries: 0,
+          abortSignal: AbortSignal.timeout(12000),
+        });
+
+        return NextResponse.json(result.output);
+      } catch (err) {
+        lastError = err;
+        console.warn(`Model ${modelId} unavailable, trying fallback...`, err);
+      }
+    }
+
+    console.error("All Gemini models failed:", lastError);
+    return NextResponse.json(
+      { error: "Gemini is temporarily busy due to high traffic. Please click Generate again in a few seconds." },
+      { status: 503 }
+    );
   } catch (error) {
     console.error("Translation API error:", error);
     return NextResponse.json(
