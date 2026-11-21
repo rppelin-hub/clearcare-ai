@@ -2,8 +2,8 @@
 
 ClearCare AI is a clinical communication assistant built for outpatient nurses and medical secretaries to translate anonymized physician consultation notes into structured, patient-friendly **After-Visit Action Cards** in **Plain English** or **Taglish**.
 
-- **Live App:** `[Paste your Vercel URL here after deploying]`
-- **Demo Walkthrough:** `[Paste your 1–2 minute screen recording link here]`
+- **Live App:** `https://clearcare-ai.vercel.app/`
+- **Demo Walkthrough:** `https://drive.google.com/file/d/1jcAgYGybYHZxtkGSK7XYPlA5jNXd0Lpo/view?usp=sharing`
 
 ---
 
