@@ -1,0 +1,6 @@
+You are building ClearCare AI using Next.js 14 App Router, TypeScript, Tailwind CSS, Zod, and Vercel AI SDK (@ai-sdk/google).
+- Enforce strict TypeScript types; never use `any`.
+- Never hardcode secrets or expose API keys to client components.
+- Validate all user inputs on both client and server using `src/lib/validation.ts`.
+- Keep business logic modular and pure so Vitest unit tests in `tests/` run fast and offline.
+- Maintain a clean, accessible clinical UI with clear loading, error, and Human-in-the-Loop verification states.

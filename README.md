@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ClearCare AI — Outpatient After-Visit & Discharge Translator
 
-## Getting Started
+ClearCare AI is a clinical communication assistant built for outpatient nurses and medical secretaries to translate anonymized physician consultation notes into structured, patient-friendly **After-Visit Action Cards** in **Plain English** or **Taglish**.
 
-First, run the development server:
+- **Live App:** `[Paste your Vercel URL here after deploying]`
+- **Demo Walkthrough:** `[Paste your 1–2 minute screen recording link here]`
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Key Features & Safety Guardrails
+- **Structured AI Generation:** Uses Next.js 14 (App Router), TypeScript, Vercel AI SDK (`@ai-sdk/google` with `gemini-3.8-flash`), and Zod (`src/lib/schema.ts`) to expand clinical abbreviations (`PO BID`, `PRN`, `NPO`) into validated JSON care cards without inventing dosages.
+- **Urgency Classification:** Highlights critical return precautions with a `High-Alert Follow-Up` badge vs. `Routine`.
+- **Client & Server PII Guardrail (`src/lib/validation.ts`):** Intercepts phone numbers, email addresses, and out-of-bounds inputs (`< 50` or `> 6,000` characters) before external API calls occur.
+- **Human-in-the-Loop Verification Gate:** Disables handout copying until clinic staff check the verification box confirming dosages and warning signs against the physician's chart.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Project Architecture
+```text
+clearcare-ai/
+├── .github/workflows/ci.yml   # GitHub Actions CI (ESLint + Vitest)
+├── src/
+│   ├── app/
+│   │   ├── api/translate/     # POST endpoint with validation + Gemini structured output
+│   │   └── page.tsx           # Split-screen UI (Idle, Loading, Error, Results, HITL Gate)
+│   ├── data/sampleNotes.ts    # Routine, High-Alert, and PII Guardrail test presets
+│   └── lib/
+│       ├── schema.ts          # Shared Zod schema for AfterVisitCard
+│       └── validation.ts      # Pure input bounds, PII regex, and handout formatter
+├── tests/validation.test.ts   # Automated Vitest unit test suite
+├── PRD.md                     # Product Requirements Document & Problem Validation
+├── spec.md                    # Technical Specification, API Contract & Acceptance Criteria
+├── CLAUDE.md                  # AI coding standards & security rules
+└── .cursorrules               # Editor AI assistant rules
